@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
+import { EffectComposer, DepthOfField, Noise } from '@react-three/postprocessing';
 import { useControls } from 'leva';
 import { Model } from './components/Model';
 import { AnimatedModel } from './components/AnimatedModel';
@@ -19,10 +20,6 @@ modelsToPreload.forEach(url => useGLTF.preload(url));
 function App() {
   // Contrôles Leva pour ajuster la scène en temps réel
   const {
-    // Contrôles de la vache
-    cowPositionY,
-    cowScale,
-    
     // Contrôles des lumières
     ambientIntensity,
     directionalIntensity,
@@ -31,23 +28,68 @@ function App() {
     // Contrôles de l'environnement
     backgroundColor,
     
-    // Contrôles du sol
-    groundScale
-  } = useControls({
-    // Vache
-    cowPositionY: { value: 0.2, min: -1, max: 3, step: 0.1, label: 'Vache - Position Y' },
-    cowScale: { value: 1, min: 0.5, max: 2, step: 0.1, label: 'Vache - Échelle' },
+    // Contrôles des effets de post-traitement
+    depthOfFieldEnabled,
+    focusDistance,
     
+    // Contrôles du grain
+    noiseEnabled,
+    noiseIntensity
+  } = useControls({
     // Éclairage
-    ambientIntensity: { value: 0.6, min: 0, max: 2, step: 0.1, label: 'Lumière ambiante' },
-    directionalIntensity: { value: 1, min: 0, max: 3, step: 0.1, label: 'Lumière directionnelle' },
-    lightColor: { value: '#FFF8DC', label: 'Couleur lumière' },
+    ambientIntensity: { 
+      value: 0.6, 
+      min: 0, 
+      max: 2, 
+      step: 0.1, 
+      label: 'Lumière ambiante'
+    },
+    directionalIntensity: { 
+      value: 1, 
+      min: 0, 
+      max: 3, 
+      step: 0.1, 
+      label: 'Lumière directionnelle'
+    },
+    lightColor: { 
+      value: '#FFF8DC', 
+      label: 'Couleur lumière'
+    },
     
     // Environnement
-    backgroundColor: { value: '#87CEEB', label: 'Couleur fond' },
+    backgroundColor: { 
+      value: '#87CEEB', 
+      label: 'Couleur fond'
+    },
     
-    // Sol
-    groundScale: { value: 100, min: 20, max: 200, step: 10, label: 'Taille du sol' }
+    // Post-traitement
+    depthOfFieldEnabled: { 
+      value: false, 
+      label: 'Profondeur de champ'
+    },
+    focusDistance: { 
+      value: 0.1, 
+      min: 0, 
+      max: 1, 
+      step: 0.01, 
+      label: 'Focus'
+    },
+    
+    // Grain
+    noiseEnabled: {
+      value: true,
+      label: 'Grain activé'
+    },
+    noiseIntensity: {
+      value: 0.25,
+      min: 0,
+      max: 1,
+      step: 0.05,
+      label: 'Intensité du grain'
+    }
+  }, { 
+    collapsed: false,
+    titleBar: { title: '🎛️ Contrôles Tryptique 3D' }
   });
 
   return (
@@ -59,13 +101,13 @@ function App() {
 
       <Suspense fallback={null}>
         {/* --- SOL D'HERBE --- */}
-        <Model url="/models/sol.glb" position={[0, 0, 0]} scale={[groundScale, 1, groundScale]} />
+        <Model url="/models/sol.glb" position={[0, 0, 0]} scale={[100, 1, 100]} />
         
         {/* --- VACHE AU CENTRE ANIMÉE EN TRAIN DE MANGER (CLIC POUR ANIMER) --- */}
         <AnimatedModel 
           url="/models/vache.glb" 
-          position={[0, cowPositionY, 0]} 
-          scale={[cowScale, cowScale, cowScale]}
+          position={[0, 0.2, 0]} 
+          scale={[1, 1, 1]}
           animationName="Eating" 
           clickToPlay={true}
         />
@@ -86,6 +128,23 @@ function App() {
       <ambientLight intensity={ambientIntensity} />
       <directionalLight position={[10, 10, 5]} intensity={directionalIntensity} color={lightColor} />
       <OrbitControls />
+
+      {/* Effets de post-traitement */}
+      <EffectComposer>
+        {noiseEnabled && (
+          <Noise 
+            premultiply={false}
+            opacity={noiseIntensity}
+          />
+        )}
+        {depthOfFieldEnabled && (
+          <DepthOfField 
+            focusDistance={focusDistance}
+            focalLength={0.05}
+            bokehScale={2}
+          />
+        )}
+      </EffectComposer>
     </Canvas>
   );
 }
