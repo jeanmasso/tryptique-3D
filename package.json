@@ -1,8 +1,26 @@
 {
   "name": "tryptique-3d",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Scène 3D interactive développée avec React et Three.js - Environnement pastoral avec vache animée et effets de post-traitement",
   "type": "module",
+  "author": "Jean Masso",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jeanmasso/tryptique-3D.git"
+  },
+  "keywords": [
+    "react",
+    "threejs",
+    "3d",
+    "webgl",
+    "animation",
+    "interactive",
+    "pastoral",
+    "postprocessing",
+    "leva"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",
